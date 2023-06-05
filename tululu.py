@@ -26,19 +26,17 @@ def download_txt(url, book_id, folder='books/'):
     soup = BeautifulSoup(book_page_response.text, 'lxml')
     book = parse_book_page(soup)
 
-        # Загрузка текста книги
-        book_text_url = f"{url}txt.php?id={book_id}"
-        book_text_response = requests.get(book_text_url)
-        check_for_redirect(book_text_response)
-        book_text_response.raise_for_status()
-        book_text = book_text_response.text
+    filename = sanitize_filename(f"{book['title']}")
 
         with open(filepath, "w", encoding="utf-8") as file:
             file.write(book_text)
 
         print('Название:', book['title'][0])
 
-        print('Автор:', book['author'][0])
+    book_text_response = requests.get(url, params=params)
+    check_for_redirect(book_text_response)
+    book_text_response.raise_for_status()
+    book_text = book_text_response.text
 
         return book_image_url
 
