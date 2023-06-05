@@ -18,11 +18,13 @@ def download_txt(url, book_id, folder='books/'):
         # Создание имени файла для сохранения книги
         filename = sanitize_filename(f"{book['title'][0]}")
 
-        # Санитизация имени папки и получение ссылки на обложку книги
-        folder = sanitize_filepath(folder)
-        book_image_url = urljoin(url, soup.find('div', class_='bookimage').find('img')['src'])
+    book_page_url = f'https://tululu.org/b{book_id}'
+    book_page_response = requests.get(book_page_url)
+    check_for_redirect(book_page_response)
+    book_page_response.raise_for_status()
 
-        filepath = os.path.join(folder, f"{book_id}. {filename}.txt")
+    soup = BeautifulSoup(book_page_response.text, 'lxml')
+    book = parse_book_page(soup)
 
         # Загрузка текста книги
         book_text_url = f"{url}txt.php?id={book_id}"
