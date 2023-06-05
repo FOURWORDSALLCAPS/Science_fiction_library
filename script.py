@@ -4,6 +4,7 @@ from pathvalidate import sanitize_filename, sanitize_filepath
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 
+
 def check_for_redirect(response):
     if response.url == 'https://tululu.org/':
         raise requests.HTTPError('Page redirected')
@@ -16,7 +17,7 @@ def download_txt(url, book_id, folder='books/'):
         os.makedirs(folder, exist_ok=True)
 
         response = requests.get(url, params=params)
-        check_for_redirect(response)  # Проверка на редирект
+        check_for_redirect(response)
         response.raise_for_status()
 
         book_page_url = f'https://tululu.org/b{book_id}'
@@ -29,6 +30,8 @@ def download_txt(url, book_id, folder='books/'):
         filename = sanitize_filename(f"{title.strip()}")
         folder = sanitize_filepath(folder)
         book_image_url = urljoin(url, soup.find('div', class_='bookimage').find('img')['src'])
+        comments = soup.find_all("div", {"class": "texts"})
+        """
         filepath = os.path.join(folder, f"{book_id}. {filename}.txt")
         book_text_url = f"{url}txt.php?id={book_id}"
         book_text_response = requests.get(book_text_url, allow_redirects=False)
@@ -38,10 +41,19 @@ def download_txt(url, book_id, folder='books/'):
 
         with open(filepath, "w", encoding="utf-8") as file:
             file.write(book_text)
+        """
+        comments_list = []
 
-        return book_image_url
-    except requests.exceptions.HTTPError as e:
-        print(f"Error: {e}")
+        for comment in comments:
+            comment_text = comment.find("span").get_text()
+            comments_list.append(comment_text)
+
+        print(title)
+        for comment in comments_list:
+            print(comment)
+
+    except requests.exceptions.HTTPError:
+        pass
 
 
 def download_image(url, folder='images/'):
@@ -55,13 +67,10 @@ def download_image(url, folder='images/'):
         with open(filepath, 'wb') as file:
             file.write(response.content)
 
-    except requests.exceptions.HTTPError as e:
-        print(f"Ошибка HTTP: {e}")
-
-    except requests.exceptions.RequestException as e:
-        print(f"Ошибка запроса: {e}")
+    except requests.exceptions.HTTPError:
+        pass
 
 
 url = 'https://tululu.org/'
 for book_id in range(11):
-    download_image(download_txt(url, book_id=book_id))
+    download_txt(url, book_id=book_id)
