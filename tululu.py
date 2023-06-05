@@ -15,8 +15,7 @@ def check_for_redirect(response):
 def download_txt(url, book_id, folder='books/'):
     params = {'id': book_id}
 
-        # Создание имени файла для сохранения книги
-        filename = sanitize_filename(f"{book['title'][0]}")
+    os.makedirs(folder, exist_ok=True)
 
     book_page_url = f'https://tululu.org/b{book_id}'
     book_page_response = requests.get(book_page_url)
@@ -28,21 +27,21 @@ def download_txt(url, book_id, folder='books/'):
 
     filename = sanitize_filename(f"{book['title']}")
 
-        with open(filepath, "w", encoding="utf-8") as file:
-            file.write(book_text)
+    folder = sanitize_filepath(folder)
 
-        print('Название:', book['title'][0])
+    filepath = os.path.join(folder, f"{book_id}. {filename}.txt")
 
     book_text_response = requests.get(url, params=params)
     check_for_redirect(book_text_response)
     book_text_response.raise_for_status()
     book_text = book_text_response.text
 
-        return book_image_url
+    with open(filepath, "w", encoding="utf-8") as file:
+        file.write(book_text)
 
-    except requests.exceptions.HTTPError:
-        pass
+    print('Название:', book['title'])
 
+    print('Автор:', book['author'])
 
 
 def download_image(book_id, folder='images/'):
@@ -66,20 +65,13 @@ def parse_book_page(soup):
     comments_tags = soup.find_all("div", {"class": "texts"})
     genre_tags = soup.find("span", class_="d_book").find_all("a")
 
-    comments = []
-    for comment in comments:
-        comment_text = comment.find("span").get_text()
-        comments_tags.append(comment_text)
+    comments = [comment.find("span").get_text() for comment in comments_tags]
 
-    genres = []
-    for genre_tag in genre_tags:
-        genres.append(genre_tag.text)
+    genres = [genre_tag.text for genre_tag in genre_tags]
 
-    titles = []
-    titles.append(sanitize_filename(title.strip()))
+    titles = sanitize_filename(title.strip())
 
-    authors = []
-    authors.append(sanitize_filename(author.strip()))
+    authors = sanitize_filename(author.strip())
 
     book = {
         'title': titles,
