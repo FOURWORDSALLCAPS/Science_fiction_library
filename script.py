@@ -1,5 +1,7 @@
 import requests
 import os
+import argparse
+
 from pathvalidate import sanitize_filename, sanitize_filepath
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
@@ -38,6 +40,9 @@ def download_txt(url, book_id, folder='books/'):
         with open(filepath, "w", encoding="utf-8") as file:
             file.write(book_text)
 
+        print('Название:', book['title'][0])
+
+        print('Автор:', book['author'][0])
         return book_image_url
 
     except requests.exceptions.HTTPError:
@@ -93,6 +98,17 @@ def parse_book_page(soup):
     return book
 
 
-url = 'https://tululu.org/'
-for book_id in range(11):
-    download_image(download_txt(url, book_id=book_id))
+def main():
+    parser = argparse.ArgumentParser(description='Telegram-бот для публикации фотографий')
+    parser.add_argument('start_id', type=int, default=10,
+                        help='id книги, с которой начнется скачивание')
+    parser.add_argument('end_id', type=int, default=20,
+                        help='id книги, на котором закончится скачивание')
+    args = parser.parse_args()
+    url = 'https://tululu.org/'
+    for book_id in range(args.start_id, args.end_id):
+        download_image(download_txt(url, book_id=book_id))
+
+
+if __name__ == '__main__':
+    main()
