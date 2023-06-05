@@ -19,46 +19,27 @@ def download_txt(url, book_id, folder='books/'):
         response = requests.get(url, params=params)
         check_for_redirect(response)
         response.raise_for_status()
-
         book_page_url = f'https://tululu.org/b{book_id}'
         book_page_response = requests.get(book_page_url)
         check_for_redirect(book_page_response)
         book_page_response.raise_for_status()
         soup = BeautifulSoup(book_page_response.text, 'lxml')
-        title_author = soup.find("h1").text
-        title, author = title_author.split(" :: ")
-        filename = sanitize_filename(f"{title.strip()}")
+        book = parse_book_page(soup)
+        filename = sanitize_filename(f"{book['title'][0]}")
         folder = sanitize_filepath(folder)
         book_image_url = urljoin(url, soup.find('div', class_='bookimage').find('img')['src'])
-        comments = soup.find_all("div", {"class": "texts"})
-        genre_tags = soup.find("span", class_="d_book").find_all("a")
-        """
         filepath = os.path.join(folder, f"{book_id}. {filename}.txt")
         book_text_url = f"{url}txt.php?id={book_id}"
-        book_text_response = requests.get(book_text_url, allow_redirects=False)
+        book_text_response = requests.get(book_text_url)
         check_for_redirect(book_text_response)
         book_text_response.raise_for_status()
         book_text = book_text_response.text
 
         with open(filepath, "w", encoding="utf-8") as file:
             file.write(book_text)
-        
-        comments_list = []
 
-        for comment in comments:
-            comment_text = comment.find("span").get_text()
-            comments_list.append(comment_text)
+        return book_image_url
 
-        print(title)
-        for comment in comments_list:
-            print(comment)
-        """
-        genres = []
-        genre_tags = soup.find("span", class_="d_book").find_all("a")
-        for genre_tag in genre_tags:
-            genres.append(genre_tag.text)
-        print(title)
-        print(genres)
     except requests.exceptions.HTTPError:
         pass
 
@@ -77,7 +58,41 @@ def download_image(url, folder='images/'):
     except requests.exceptions.HTTPError:
         pass
 
+    except requests.exceptions.RequestException as e:
+        pass
+
+
+def parse_book_page(soup):
+    title_author = soup.find("h1").text
+    title, author = title_author.split(" :: ")
+    comments_tags = soup.find_all("div", {"class": "texts"})
+    genre_tags = soup.find("span", class_="d_book").find_all("a")
+
+    comments = []
+    for comment in comments:
+        comment_text = comment.find("span").get_text()
+        comments_tags.append(comment_text)
+
+    genres = []
+    for genre_tag in genre_tags:
+        genres.append(genre_tag.text)
+
+    titles = []
+    titles.append(sanitize_filename(title.strip()))
+
+    authors = []
+    authors.append(sanitize_filename(author.strip()))
+
+    book = {
+        'title': titles,
+        'author': authors,
+        'genre': genres,
+        'comment': comments,
+    }
+
+    return book
+
 
 url = 'https://tululu.org/'
 for book_id in range(11):
-    download_txt(url, book_id=book_id)
+    download_image(download_txt(url, book_id=book_id))
