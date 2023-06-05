@@ -1,6 +1,8 @@
 import requests
 import os
 import argparse
+import sys
+import time
 
 from pathvalidate import sanitize_filename, sanitize_filepath
 from bs4 import BeautifulSoup
@@ -91,15 +93,21 @@ def main():
                         help='id книги, на которой закончится скачивание')
     args = parser.parse_args()
     url = 'https://tululu.org/txt.php'
-    try:
-        for book_id in range(args.start_id, args.end_id):
-            download_txt(url, book_id=book_id)
-            download_image(book_id=book_id)
-    except requests.exceptions.HTTPError as e:
-        print(f"Error: Unable to download book: {e}")
-
-    except requests.exceptions.RequestException as e:
-        print(f"The request failed: {e}")
+    for book_id in range(args.start_id, args.end_id):
+        book_page_url = f'https://tululu.org/b{book_id}'
+        try:
+            book_page_response = requests.get(book_page_url)
+            check_for_redirect(book_page_response)
+            book_page_response.raise_for_status()
+            soup = BeautifulSoup(book_page_response.text, 'lxml')
+            book = parse_book_page(soup, book_page_url)
+            download_txt(url, book, book_id=book_id)
+            download_image(book)
+        except requests.exceptions.HTTPError as e:
+            print(f"Error: Unable to download book {book_id}: {e}", file=sys.stderr)
+        except requests.exceptions.ConnectionError as e:
+            print(f"The request for book {book_id} failed: {e}", file=sys.stderr)
+            time.sleep(3)
 
 
 if __name__ == '__main__':
