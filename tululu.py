@@ -13,24 +13,7 @@ def check_for_redirect(response):
 
 
 def download_txt(url, book_id, folder='books/'):
-    try:
-        params = {'id': book_id}
-
-        os.makedirs(folder, exist_ok=True)
-
-        response = requests.get(url, params=params)
-        check_for_redirect(response)
-        response.raise_for_status()
-
-        # Загрузка страницы с информацией о книге
-        book_page_url = f'https://tululu.org/b{book_id}'
-        book_page_response = requests.get(book_page_url)
-        check_for_redirect(book_page_response)  # Проверка на редирект
-        book_page_response.raise_for_status()
-
-        # Получение необходимой информации о книге
-        soup = BeautifulSoup(book_page_response.text, 'lxml')
-        book = parse_book_page(soup)
+    params = {'id': book_id}
 
         # Создание имени файла для сохранения книги
         filename = sanitize_filename(f"{book['title'][0]}")
@@ -61,22 +44,20 @@ def download_txt(url, book_id, folder='books/'):
         pass
 
 
-def download_image(url, folder='images/'):
-    try:
-        os.makedirs(folder, exist_ok=True)
-        response = requests.get(url)
-        response.raise_for_status()
-        check_for_redirect(response)
-        filename = os.path.basename(urlparse(url).path)
-        filepath = os.path.join(folder, filename)
-        with open(filepath, 'wb') as file:
-            file.write(response.content)
 
-    except requests.exceptions.HTTPError:
-        pass
-
-    except requests.exceptions.RequestException as e:
-        pass
+def download_image(book_id, folder='images/'):
+    book_page_url = f'https://tululu.org/b{book_id}'
+    book_page_response = requests.get(book_page_url)
+    soup = BeautifulSoup(book_page_response.text, 'lxml')
+    book_image_url = urljoin(book_page_url, soup.find('div', class_='bookimage').find('img')['src'])
+    os.makedirs(folder, exist_ok=True)
+    response = requests.get(book_image_url)
+    response.raise_for_status()
+    check_for_redirect(response)
+    filename = os.path.basename(urlparse(book_image_url).path)
+    filepath = os.path.join(folder, filename)
+    with open(filepath, 'wb') as file:
+        file.write(response.content)
 
 
 def parse_book_page(soup):
@@ -117,9 +98,16 @@ def main():
     parser.add_argument('--end_id', type=int, default=20,
                         help='id книги, на которой закончится скачивание')
     args = parser.parse_args()
-    url = 'https://tululu.org/'
-    for book_id in range(args.start_id, args.end_id):
-        download_image(download_txt(url, book_id=book_id))
+    url = 'https://tululu.org/txt.php'
+    try:
+        for book_id in range(args.start_id, args.end_id):
+            download_txt(url, book_id=book_id)
+            download_image(book_id=book_id)
+    except requests.exceptions.HTTPError as e:
+        print(f"Error: Unable to download book: {e}")
+
+    except requests.exceptions.RequestException as e:
+        print(f"The request failed: {e}")
 
 
 if __name__ == '__main__':
