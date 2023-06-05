@@ -20,7 +20,7 @@
 - `--start_id` - интервал от которого начнется скачивание.
 - `--end_id` - интервал до которого пройдет скачивание.
 
-```python space_for_everyone_bot.py --start_id 5 --end_id 20```
+```python tululu.py --start_id 5 --end_id 20```
 
 ### Результат:
 Получаете скрипт, который:
