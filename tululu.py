@@ -92,7 +92,7 @@ def parse_book_page(soup):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Telegram-бот для публикации фотографий')
+    parser = argparse.ArgumentParser(description='Данный код позволяет скачивать книги и обложки книг с сайта')
     parser.add_argument('--start_id', type=int, default=10,
                         help='id книги, с которой начнется скачивание')
     parser.add_argument('--end_id', type=int, default=20,
