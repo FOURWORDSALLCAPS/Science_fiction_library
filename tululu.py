@@ -14,25 +14,12 @@ def check_for_redirect(response):
         raise requests.HTTPError('Page redirected')
 
 
-def download_txt(url, book_id, folder='books/'):
+def download_txt(url, book, book_id, folder='books/'):
     params = {'id': book_id}
-
     os.makedirs(folder, exist_ok=True)
-
-    book_page_url = f'https://tululu.org/b{book_id}'
-    book_page_response = requests.get(book_page_url)
-    check_for_redirect(book_page_response)
-    book_page_response.raise_for_status()
-
-    soup = BeautifulSoup(book_page_response.text, 'lxml')
-    book = parse_book_page(soup)
-
     filename = sanitize_filename(f"{book['title']}")
-
     folder = sanitize_filepath(folder)
-
     filepath = os.path.join(folder, f"{book_id}. {filename}.txt")
-
     book_text_response = requests.get(url, params=params)
     check_for_redirect(book_text_response)
     book_text_response.raise_for_status()
@@ -46,40 +33,38 @@ def download_txt(url, book_id, folder='books/'):
     print('Автор:', book['author'])
 
 
-def download_image(book_id, folder='images/'):
-    book_page_url = f'https://tululu.org/b{book_id}'
-    book_page_response = requests.get(book_page_url)
-    soup = BeautifulSoup(book_page_response.text, 'lxml')
-    book_image_url = urljoin(book_page_url, soup.find('div', class_='bookimage').find('img')['src'])
+def download_image(book, folder='images/'):
     os.makedirs(folder, exist_ok=True)
-    response = requests.get(book_image_url)
+    response = requests.get(book['images'])
     response.raise_for_status()
     check_for_redirect(response)
-    filename = os.path.basename(urlparse(book_image_url).path)
+    filename = os.path.basename(urlparse(book['images']).path)
     filepath = os.path.join(folder, filename)
     with open(filepath, 'wb') as file:
         file.write(response.content)
 
 
-def parse_book_page(soup):
+def parse_book_page(soup, book_page_url):
     title_author = soup.find("h1").text
     title, author = title_author.split(" :: ")
-    comments_tags = soup.find_all("div", {"class": "texts"})
     genre_tags = soup.find("span", class_="d_book").find_all("a")
+    comments_tags = soup.find_all("div", {"class": "texts"})
+    book_image_url = urljoin(book_page_url, soup.find('div', class_='bookimage').find('img')['src'])
 
     comments = [comment.find("span").get_text() for comment in comments_tags]
 
     genres = [genre_tag.text for genre_tag in genre_tags]
 
-    titles = sanitize_filename(title.strip())
+    title = sanitize_filename(title.strip())
 
-    authors = sanitize_filename(author.strip())
+    author = sanitize_filename(author.strip())
 
     book = {
-        'title': titles,
-        'author': authors,
-        'genre': genres,
-        'comment': comments,
+        'title': title,
+        'author': author,
+        'genres': genres,
+        'comments': comments,
+        'images': book_image_url
     }
 
     return book
