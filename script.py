@@ -31,6 +31,7 @@ def download_txt(url, book_id, folder='books/'):
         folder = sanitize_filepath(folder)
         book_image_url = urljoin(url, soup.find('div', class_='bookimage').find('img')['src'])
         comments = soup.find_all("div", {"class": "texts"})
+        genre_tags = soup.find("span", class_="d_book").find_all("a")
         """
         filepath = os.path.join(folder, f"{book_id}. {filename}.txt")
         book_text_url = f"{url}txt.php?id={book_id}"
@@ -41,7 +42,7 @@ def download_txt(url, book_id, folder='books/'):
 
         with open(filepath, "w", encoding="utf-8") as file:
             file.write(book_text)
-        """
+        
         comments_list = []
 
         for comment in comments:
@@ -51,7 +52,13 @@ def download_txt(url, book_id, folder='books/'):
         print(title)
         for comment in comments_list:
             print(comment)
-
+        """
+        genres = []
+        genre_tags = soup.find("span", class_="d_book").find_all("a")
+        for genre_tag in genre_tags:
+            genres.append(genre_tag.text)
+        print(title)
+        print(genres)
     except requests.exceptions.HTTPError:
         pass
 
