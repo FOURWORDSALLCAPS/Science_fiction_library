@@ -21,16 +21,27 @@ def download_txt(url, book_id, folder='books/'):
         response = requests.get(url, params=params)
         check_for_redirect(response)
         response.raise_for_status()
+
+        # Загрузка страницы с информацией о книге
         book_page_url = f'https://tululu.org/b{book_id}'
         book_page_response = requests.get(book_page_url)
-        check_for_redirect(book_page_response)
+        check_for_redirect(book_page_response)  # Проверка на редирект
         book_page_response.raise_for_status()
+
+        # Получение необходимой информации о книге
         soup = BeautifulSoup(book_page_response.text, 'lxml')
         book = parse_book_page(soup)
+
+        # Создание имени файла для сохранения книги
         filename = sanitize_filename(f"{book['title'][0]}")
+
+        # Санитизация имени папки и получение ссылки на обложку книги
         folder = sanitize_filepath(folder)
         book_image_url = urljoin(url, soup.find('div', class_='bookimage').find('img')['src'])
+
         filepath = os.path.join(folder, f"{book_id}. {filename}.txt")
+
+        # Загрузка текста книги
         book_text_url = f"{url}txt.php?id={book_id}"
         book_text_response = requests.get(book_text_url)
         check_for_redirect(book_text_response)
@@ -43,6 +54,7 @@ def download_txt(url, book_id, folder='books/'):
         print('Название:', book['title'][0])
 
         print('Автор:', book['author'][0])
+
         return book_image_url
 
     except requests.exceptions.HTTPError:
@@ -54,7 +66,7 @@ def download_image(url, folder='images/'):
         os.makedirs(folder, exist_ok=True)
         response = requests.get(url)
         response.raise_for_status()
-
+        check_for_redirect(response)
         filename = os.path.basename(urlparse(url).path)
         filepath = os.path.join(folder, filename)
         with open(filepath, 'wb') as file:
@@ -100,10 +112,10 @@ def parse_book_page(soup):
 
 def main():
     parser = argparse.ArgumentParser(description='Telegram-бот для публикации фотографий')
-    parser.add_argument('start_id', type=int, default=10,
+    parser.add_argument('--start_id', type=int, default=10,
                         help='id книги, с которой начнется скачивание')
-    parser.add_argument('end_id', type=int, default=20,
-                        help='id книги, на котором закончится скачивание')
+    parser.add_argument('--end_id', type=int, default=20,
+                        help='id книги, на которой закончится скачивание')
     args = parser.parse_args()
     url = 'https://tululu.org/'
     for book_id in range(args.start_id, args.end_id):
