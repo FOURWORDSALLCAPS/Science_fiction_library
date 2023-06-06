@@ -32,10 +32,10 @@ def download_txt(title, book_id, folder='books/'):
 
 def download_image(image_url, folder='images/'):
     os.makedirs(folder, exist_ok=True)
-    response = requests.get(image)
+    response = requests.get(image_url)
     response.raise_for_status()
     check_for_redirect(response)
-    filename = os.path.basename(urlparse(image).path)
+    filename = os.path.basename(urlparse(image_url).path)
     filepath = os.path.join(folder, filename)
     with open(filepath, 'wb') as file:
         file.write(response.content)
@@ -61,7 +61,7 @@ def parse_book_page(soup, book_page_url):
         'author': author,
         'genres': genres,
         'comments': comments,
-        'image': book_image_url
+        'image_url': book_image_url
     }
 
     return book
