@@ -64,7 +64,7 @@ def parse_book_page(soup, book_page_url):
         'author': author,
         'genres': genres,
         'comments': comments,
-        'images': book_image_url
+        'image': book_image_url
     }
 
     return book
