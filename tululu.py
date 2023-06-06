@@ -29,7 +29,6 @@ def download_txt(title, book_id, folder='books/'):
     with open(filepath, 'w', encoding='utf-8') as file:
         file.write(book_text)
 
-    print('Название:', title)
 
 def download_image(image_url, folder='images/'):
     os.makedirs(folder, exist_ok=True)
@@ -83,8 +82,10 @@ def main():
             book_page_response.raise_for_status()
             soup = BeautifulSoup(book_page_response.text, 'lxml')
             book = parse_book_page(soup, book_page_url)
-            download_txt(book['title'], book['author'], book_id=book_id)
-            download_image(book['image'])
+            download_txt(book['title'], book_id=book_id)
+            download_image(book['image_url'])
+            print('Название:', book['title'])
+            print('Автор:', book['author'])
         except requests.exceptions.HTTPError as e:
             print(f'Error: Unable to download book {book_id}: {e}', file=sys.stderr)
         except requests.exceptions.ConnectionError as e:
