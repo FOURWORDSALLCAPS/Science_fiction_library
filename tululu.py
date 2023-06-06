@@ -14,27 +14,24 @@ def check_for_redirect(response):
         raise requests.HTTPError('Page redirected')
 
 
-def download_txt(title, author, book_id, folder='books/'):
+def download_txt(title, book_id, folder='books/'):
     params = {'id': book_id}
     url = 'https://tululu.org/txt.php'
     os.makedirs(folder, exist_ok=True)
     filename = sanitize_filename(f"{title}")
     folder = sanitize_filepath(folder)
-    filepath = os.path.join(folder, f"{book_id}. {filename}.txt")
+    filepath = os.path.join(folder, f'{book_id}. {filename}.txt')
     book_text_response = requests.get(url, params=params)
     check_for_redirect(book_text_response)
     book_text_response.raise_for_status()
     book_text = book_text_response.text
 
-    with open(filepath, "w", encoding="utf-8") as file:
+    with open(filepath, 'w', encoding='utf-8') as file:
         file.write(book_text)
 
     print('Название:', title)
 
-    print('Автор:', author)
-
-
-def download_image(image, folder='images/'):
+def download_image(image_url, folder='images/'):
     os.makedirs(folder, exist_ok=True)
     response = requests.get(image)
     response.raise_for_status()
@@ -46,13 +43,13 @@ def download_image(image, folder='images/'):
 
 
 def parse_book_page(soup, book_page_url):
-    title_author = soup.find("h1").text
+    title_author = soup.find('h1').text
     title, author = title_author.split(" :: ")
-    genre_tags = soup.find("span", class_="d_book").find_all("a")
-    comments_tags = soup.find_all("div", {"class": "texts"})
+    genre_tags = soup.find('span', class_='d_book').find_all('a')
+    comments_tags = soup.find_all('div', {'class': 'texts'})
     book_image_url = urljoin(book_page_url, soup.find('div', class_='bookimage').find('img')['src'])
 
-    comments = [comment.find("span").get_text() for comment in comments_tags]
+    comments = [comment.find('span').get_text() for comment in comments_tags]
 
     genres = [genre_tag.text for genre_tag in genre_tags]
 
@@ -89,9 +86,9 @@ def main():
             download_txt(book['title'], book['author'], book_id=book_id)
             download_image(book['image'])
         except requests.exceptions.HTTPError as e:
-            print(f"Error: Unable to download book {book_id}: {e}", file=sys.stderr)
+            print(f'Error: Unable to download book {book_id}: {e}', file=sys.stderr)
         except requests.exceptions.ConnectionError as e:
-            print(f"The request for book {book_id} failed: {e}", file=sys.stderr)
+            print(f'The request for book {book_id} failed: {e}', file=sys.stderr)
             time.sleep(3)
 
 
