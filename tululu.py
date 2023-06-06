@@ -16,6 +16,7 @@ def check_for_redirect(response):
 
 def download_txt(title, author, book_id, folder='books/'):
     params = {'id': book_id}
+    url = 'https://tululu.org/txt.php'
     os.makedirs(folder, exist_ok=True)
     filename = sanitize_filename(f"{title}")
     folder = sanitize_filepath(folder)
@@ -77,7 +78,6 @@ def main():
     parser.add_argument('--end_id', type=int, default=20,
                         help='id книги, на которой закончится скачивание')
     args = parser.parse_args()
-    url = 'https://tululu.org/txt.php'
     for book_id in range(args.start_id, args.end_id):
         book_page_url = f'https://tululu.org/b{book_id}'
         try:
