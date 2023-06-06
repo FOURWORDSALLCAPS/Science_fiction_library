@@ -14,10 +14,10 @@ def check_for_redirect(response):
         raise requests.HTTPError('Page redirected')
 
 
-def download_txt(url, book, book_id, folder='books/'):
+def download_txt(title, author, book_id, folder='books/'):
     params = {'id': book_id}
     os.makedirs(folder, exist_ok=True)
-    filename = sanitize_filename(f"{book['title']}")
+    filename = sanitize_filename(f"{title}")
     folder = sanitize_filepath(folder)
     filepath = os.path.join(folder, f"{book_id}. {filename}.txt")
     book_text_response = requests.get(url, params=params)
@@ -28,17 +28,17 @@ def download_txt(url, book, book_id, folder='books/'):
     with open(filepath, "w", encoding="utf-8") as file:
         file.write(book_text)
 
-    print('Название:', book['title'])
+    print('Название:', title)
 
-    print('Автор:', book['author'])
+    print('Автор:', author)
 
 
-def download_image(book, folder='images/'):
+def download_image(image, folder='images/'):
     os.makedirs(folder, exist_ok=True)
-    response = requests.get(book['images'])
+    response = requests.get(image)
     response.raise_for_status()
     check_for_redirect(response)
-    filename = os.path.basename(urlparse(book['images']).path)
+    filename = os.path.basename(urlparse(image).path)
     filepath = os.path.join(folder, filename)
     with open(filepath, 'wb') as file:
         file.write(response.content)
@@ -86,8 +86,8 @@ def main():
             book_page_response.raise_for_status()
             soup = BeautifulSoup(book_page_response.text, 'lxml')
             book = parse_book_page(soup, book_page_url)
-            download_txt(url, book, book_id=book_id)
-            download_image(book)
+            download_txt(book['title'], book['author'], book_id=book_id)
+            download_image(book['image'])
         except requests.exceptions.HTTPError as e:
             print(f"Error: Unable to download book {book_id}: {e}", file=sys.stderr)
         except requests.exceptions.ConnectionError as e:
