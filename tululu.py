@@ -69,12 +69,12 @@ def parse_book_page(soup, book_page_url):
 
 def main():
     parser = argparse.ArgumentParser(description='Данный код позволяет скачивать книги и обложки книг с сайта')
-    parser.add_argument('--start_id', type=int, default=10,
+    parser.add_argument('--start_id', type=int, nargs='?', default=10,
                         help='id книги, с которой начнется скачивание')
-    parser.add_argument('--end_id', type=int, default=20,
+    parser.add_argument('--end_id', type=int, nargs='?', default=20,
                         help='id книги, на которой закончится скачивание')
     args = parser.parse_args()
-    for page in range(args.start_id, args.end_id):
+    for page in range(args.start_id, args.end_id if args.end_id else args.start_id + 1):
         url = f"https://tululu.org/l55/{page}"
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'lxml')
