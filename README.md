@@ -22,7 +22,6 @@
 - `--dest_folder` - Путь к каталогу с результатами парсинга: картинкам, книгам, JSON.
 - `--skip_imgs` - Не скачивать обложки для книг.
 - `--skip_txt` - Не скачивать текстовые файлы для книг.
-- `--json_path` - Cвой путь к *.json файлу с результатами.
 
 
 ```python tululu.py --start_id 5 --end_id 20 --dest_folder ./results/ --skip_imgs --skip_txt```

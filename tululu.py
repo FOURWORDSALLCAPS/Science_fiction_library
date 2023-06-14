@@ -87,8 +87,6 @@ def main():
                         help='Не скачивать обложки для книг')
     parser.add_argument('--skip_txt', action='store_true',
                         help='Не скачивать текстовые файлы для книг')
-    parser.add_argument('--json_path', type=str, default='#',
-                        help='Cвой путь к *.json файлу с результатами')
     args = parser.parse_args()
     books = []
     for page in range(args.start_id, args.end_id if args.end_id else args.start_id + 1):
@@ -112,7 +110,7 @@ def main():
                     download_txt(book['title'], book_id=book_id, dest_folder=os.path.join(args.dest_folder, 'books/'))
                 if not args.skip_imgs:
                     download_image(book['image_url'], dest_folder=os.path.join(args.dest_folder, 'images/'))
-                save_to_json(books, dest_folder=os.path.join(args.dest_folder, 'json/'))
+                save_to_json(books, dest_folder=os.path.join(args.json_path, 'json/'))
                 print('Название:', book['title'])
                 print('Автор:', book['author'])
             except requests.exceptions.HTTPError as e:
