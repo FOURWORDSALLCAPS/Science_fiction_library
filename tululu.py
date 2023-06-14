@@ -42,13 +42,13 @@ def download_image(image_url, folder='images/'):
 
 
 def parse_book_page(soup, book_page_url):
-    title_author = soup.find('h1').text
+    title_author = soup.select_one('h1').text
     title, author = title_author.split(" :: ")
-    genre_tags = soup.find('span', class_='d_book').find_all('a')
-    comments_tags = soup.find_all('div', {'class': 'texts'})
-    book_image_url = urljoin(book_page_url, soup.find('div', class_='bookimage').find('img')['src'])
+    genre_tags = soup.select('d_book a')
+    comments_tags = soup.select('div.texts')
+    book_image_url = urljoin(book_page_url, soup.select_one('div.bookimage img')['src'])
 
-    comments = [comment.find('span').get_text() for comment in comments_tags]
+    comments = [comment.select_one('span').get_text() for comment in comments_tags]
 
     genres = [genre_tag.text for genre_tag in genre_tags]
 
@@ -78,8 +78,8 @@ def main():
         url = f"https://tululu.org/l55/{page}"
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'lxml')
-        for book in soup.find_all('div', class_='bookimage'):
-            book_href = book.find('a')['href']
+        for book in soup.select('div.bookimage'):
+            book_href = book.select_one('a')['href']
             trans_table = {ord('b'): None}
             book_id = sanitize_filename(book_href).translate(trans_table)
             book_link = urljoin(url, book_href)
