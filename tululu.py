@@ -93,6 +93,8 @@ def main():
     for page in range(args.start_id, end_id):
         url = f"https://tululu.org/l55/{page}"
         response = requests.get(url)
+        response.raise_for_status()
+        check_for_redirect(response)
         soup = BeautifulSoup(response.text, 'lxml')
         for book in soup.select('div.bookimage'):
             book_href = book.select_one('a')['href']
