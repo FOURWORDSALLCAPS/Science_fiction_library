@@ -89,7 +89,8 @@ def main():
                         help='Не скачивать текстовые файлы для книг')
     args = parser.parse_args()
     books = []
-    for page in range(args.start_id, args.end_id if args.end_id else args.start_id + 1):
+    end_id = args.end_id if args.end_id else args.start_id + 1
+    for page in range(args.start_id, end_id):
         url = f"https://tululu.org/l55/{page}"
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'lxml')
