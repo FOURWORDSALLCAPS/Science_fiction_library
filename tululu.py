@@ -43,7 +43,7 @@ def download_image(image_url, dest_folder):
 
 def save_to_json(books, dest_folder):
     os.makedirs(dest_folder, exist_ok=True)
-    filepath = os.path.join(dest_folder)
+    filepath = os.path.join(dest_folder, 'book.json')
     with open(filepath, 'w', encoding='utf-8') as file:
         json.dump(books, file, ensure_ascii=False, indent=4)
 
@@ -101,19 +101,18 @@ def main():
             trans_table = {ord('b'): None}
             book_id = sanitize_filename(book_href).translate(trans_table)
             book_link = urljoin(url, book_href)
-            url = f"{book_link}"
             try:
-                response = requests.get(url)
+                response = requests.get(book_link)
                 check_for_redirect(response)
                 response.raise_for_status()
                 soup = BeautifulSoup(response.text, 'lxml')
-                book = parse_book_page(soup, url)
+                book = parse_book_page(soup, book_link)
                 books.append(book)
                 if not args.skip_txt:
                     download_txt(book['title'], book_id=book_id, dest_folder=os.path.join(args.dest_folder, 'books/'))
                 if not args.skip_imgs:
                     download_image(book['image_url'], dest_folder=os.path.join(args.dest_folder, 'images/'))
-                save_to_json(books, dest_folder=os.path.join(args.json_path, 'json/'))
+
                 print('Название:', book['title'])
                 print('Автор:', book['author'])
             except requests.exceptions.HTTPError as e:
@@ -121,6 +120,7 @@ def main():
             except requests.exceptions.ConnectionError as e:
                 print(f'The request for book {book_id} failed: {e}', file=sys.stderr)
                 time.sleep(3)
+    save_to_json(books, dest_folder=os.path.join(args.dest_folder, 'json/'))
 
 
 if __name__ == '__main__':
