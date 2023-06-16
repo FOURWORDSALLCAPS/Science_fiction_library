@@ -74,12 +74,20 @@ def parse_book_page(soup, book_page_url):
     return book
 
 
+def get_last_page_number():
+    url = 'https://tululu.org/l55/'
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    last_page_id = soup.select('.npage')[-1]['href'].split('/')[-2]
+    return int(last_page_id) + 1
+
+
 def main():
     parser = argparse.ArgumentParser(description='Данный код позволяет скачивать книги и обложки книг с сайта',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--start_id', type=int, nargs='?', default=10,
+    parser.add_argument('--start_id', type=int, nargs='?', default=1,
                         help='Страница, с которой начнется скачивание')
-    parser.add_argument('--end_id', type=int, nargs='?', default=20,
+    parser.add_argument('--end_id', type=int, nargs='?', default=get_last_page_number(),
                         help='Страница, на которой закончится скачивание')
     parser.add_argument('--dest_folder', type=str, default='.',
                         help='Путь к каталогу с результатами парсинга: картинкам, книгам, JSON')
@@ -89,8 +97,7 @@ def main():
                         help='Не скачивать текстовые файлы для книг')
     args = parser.parse_args()
     books = []
-    end_id = args.end_id if args.end_id else args.start_id + 1
-    for page in range(args.start_id, end_id):
+    for page in range(args.start_id, args.end_id):
         url = f"https://tululu.org/l55/{page}"
         try:
             response = requests.get(url)
