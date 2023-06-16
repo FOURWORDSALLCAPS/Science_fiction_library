@@ -92,34 +92,40 @@ def main():
     end_id = args.end_id if args.end_id else args.start_id + 1
     for page in range(args.start_id, end_id):
         url = f"https://tululu.org/l55/{page}"
-        response = requests.get(url)
-        response.raise_for_status()
-        check_for_redirect(response)
-        soup = BeautifulSoup(response.text, 'lxml')
-        for book in soup.select('div.bookimage'):
-            book_href = book.select_one('a')['href']
-            trans_table = {ord('b'): None}
-            book_id = sanitize_filename(book_href).translate(trans_table)
-            book_link = urljoin(url, book_href)
-            try:
-                response = requests.get(book_link)
-                check_for_redirect(response)
-                response.raise_for_status()
-                soup = BeautifulSoup(response.text, 'lxml')
-                book = parse_book_page(soup, book_link)
-                books.append(book)
-                if not args.skip_txt:
-                    download_txt(book['title'], book_id=book_id, dest_folder=os.path.join(args.dest_folder, 'books/'))
-                if not args.skip_imgs:
-                    download_image(book['image_url'], dest_folder=os.path.join(args.dest_folder, 'images/'))
-
-                print('Название:', book['title'])
-                print('Автор:', book['author'])
-            except requests.exceptions.HTTPError as e:
-                print(f'Error: Unable to download book {book_id}: {e}', file=sys.stderr)
-            except requests.exceptions.ConnectionError as e:
-                print(f'The request for book {book_id} failed: {e}', file=sys.stderr)
-                time.sleep(3)
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            check_for_redirect(response)
+            soup = BeautifulSoup(response.text, 'lxml')
+            for book_id in soup.select('div.bookimage'):
+                book_href = book_id.select_one('a')['href']
+                trans_table = {ord('b'): None}
+                book_unique_id = sanitize_filename(book_href).translate(trans_table)
+                book_link = urljoin(url, book_href)
+                try:
+                    response = requests.get(book_link)
+                    check_for_redirect(response)
+                    response.raise_for_status()
+                    soup = BeautifulSoup(response.text, 'lxml')
+                    book = parse_book_page(soup, book_link)
+                    books.append(book)
+                    if not args.skip_txt:
+                        download_txt(book['title'], book_id=book_unique_id,
+                                     dest_folder=os.path.join(args.dest_folder, 'books/'))
+                    if not args.skip_imgs:
+                        download_image(book['image_url'], dest_folder=os.path.join(args.dest_folder, 'images/'))
+                    print('Название:', book['title'])
+                    print('Автор:', book['author'])
+                except requests.exceptions.HTTPError as e:
+                    print(f'Error: Unable to download book {book_unique_id}: {e}', file=sys.stderr)
+                except requests.exceptions.ConnectionError as e:
+                    print(f'The request for book {book_unique_id} failed: {e}', file=sys.stderr)
+                    time.sleep(3)
+        except requests.exceptions.HTTPError as e:
+            print(f'Error: Unable to load page {page}: {e}', file=sys.stderr)
+        except requests.exceptions.ConnectionError as e:
+            print(f'The request for page {page} failed: {e}', file=sys.stderr)
+            time.sleep(3)
     save_to_json(books, dest_folder=os.path.join(args.dest_folder, 'json/'))
 
 
