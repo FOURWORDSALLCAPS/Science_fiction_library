@@ -76,10 +76,14 @@ def parse_book_page(soup, book_page_url):
 
 def get_last_page_number():
     url = 'https://tululu.org/l55/'
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    last_page_id = soup.select('.npage')[-1]['href'].split('/')[-2]
-    return int(last_page_id) + 1
+    try:
+        response = requests.get(url)
+        check_for_redirect(response)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        last_page_id = soup.select('.npage')[-1]['href'].split('/')[-2]
+        return int(last_page_id) + 1
+    except requests.exceptions.HTTPError as e:
+        print(f'Error: Unable to load page: {e}', file=sys.stderr)
 
 
 def main():
