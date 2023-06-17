@@ -18,7 +18,7 @@ def download_txt(title, book_id, dest_folder):
     params = {'id': book_id}
     url = 'https://tululu.org/txt.php'
     os.makedirs(dest_folder, exist_ok=True)
-    filename = sanitize_filename(f"{title}")
+    filename = sanitize_filename(f'{title}')
     dest_folder = sanitize_filepath(dest_folder)
     filepath = os.path.join(dest_folder, f'{filename}.txt')
     book_text_response = requests.get(url, params=params)
@@ -97,8 +97,8 @@ def main():
                         help='Не скачивать текстовые файлы для книг')
     args = parser.parse_args()
     books = []
-    for page in range(args.start_id, args.end_id):
-        url = f"https://tululu.org/l55/{page}"
+    for page_id in range(args.start_id, args.end_id):
+        url = f'https://tululu.org/l55/{page_id}'
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -129,9 +129,9 @@ def main():
                     print(f'The request for book {book_unique_id} failed: {e}', file=sys.stderr)
                     time.sleep(3)
         except requests.exceptions.HTTPError as e:
-            print(f'Error: Unable to load page {page}: {e}', file=sys.stderr)
+            print(f'Error: Unable to load page {page_id}: {e}', file=sys.stderr)
         except requests.exceptions.ConnectionError as e:
-            print(f'The request for page {page} failed: {e}', file=sys.stderr)
+            print(f'The request for page {page_id} failed: {e}', file=sys.stderr)
             time.sleep(3)
     save_to_json(books, dest_folder=os.path.join(args.dest_folder, 'json/'))
 
