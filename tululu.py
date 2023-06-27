@@ -63,9 +63,12 @@ def parse_book_page(soup, book_page_url):
 
     author = sanitize_filename(author.strip())
 
+    book_path = f'books/{title}.txt'
+
     book = {
         'title': title,
         'author': author,
+        'book_path': book_path,
         'genres': genres,
         'comments': comments,
         'image_url': book_image_url
