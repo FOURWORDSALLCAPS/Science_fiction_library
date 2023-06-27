@@ -28,7 +28,7 @@ def on_reload():
 
         template = env.get_template('template.html')
 
-        rendered_page = template.render(books=page_books)
+        rendered_page = template.render(books=page_books, page_num=page_num, num_pages=num_pages)
 
         with open(f'pages/index{page_num}.html', 'w', encoding="utf8") as file:
             file.write(rendered_page)

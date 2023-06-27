@@ -14,6 +14,24 @@
     <title>Hello, world!</title>
   </head>
   <body>
+    <hr style="border-top: 1px solid #ccc; margin-top: 0px; margin-bottom: 50px;">
+    <nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+      {% if page_num > 1 %}
+        <li class="page-item"><a class="page-link" href="index{{page_num - 1}}.html">Назад</a></li>
+      {% endif %}
+      {% for i in range(1, num_pages + 1) %}
+        {% if i == page_num %}
+          <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+        {% else %}
+          <li class="page-item"><a class="page-link" href="index{{i}}.html">{{ i }}</a></li>
+        {% endif %}
+      {% endfor %}
+      {% if page_num < num_pages %}
+        <li class="page-item"><a class="page-link" href="index{{page_num + 1}}.html">Вперёд</a></li>
+      {% endif %}
+    </ul>
+  </nav>
     <div class="container">
     {% for book in books %}
       {% if loop.index0 % 2 == 0 %}
