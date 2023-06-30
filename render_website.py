@@ -1,23 +1,12 @@
 import json
+import argparse
 
 from livereload import Server
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from math import ceil
 
 
-with open("json/book.json", "r", encoding="utf-8") as file:
-    books_json = file.read()
-
-
-books = json.loads(books_json)
-
-env = Environment(
-    loader=FileSystemLoader('.'),
-    autoescape=select_autoescape(['html', 'xml'])
-)
-
-
-def on_reload():
+def on_reload(books, env):
     page_size = 20
 
     num_pages = ceil(len(books) / page_size)
@@ -34,8 +23,27 @@ def on_reload():
             file.write(rendered_page)
 
 
-if __name__ == '__main__':
-    on_reload()
+def main():
+    parser = argparse.ArgumentParser(description='Данный код позволяет открыть локальную версию библиотеки книг',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--dest_folder', type=str, default='json/book.json',
+                        help='Путь к конфигурационному файлу .json')
+    args = parser.parse_args()
+
+    with open(args.dest_folder, "r", encoding="utf-8") as file:
+        books_json = file.read()
+
+    books = json.loads(books_json)
+
+    env = Environment(
+        loader=FileSystemLoader('.'),
+        autoescape=select_autoescape(['html', 'xml'])
+    )
+    on_reload(books, env)
     server = Server()
     server.watch('template.html', on_reload)
     server.serve(root='.')
+
+
+if __name__ == '__main__':
+    main()
