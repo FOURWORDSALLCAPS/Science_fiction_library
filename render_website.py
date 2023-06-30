@@ -4,6 +4,7 @@ import argparse
 from livereload import Server
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from math import ceil
+from urllib.parse import quote
 
 
 def on_reload(books, env):
@@ -14,9 +15,13 @@ def on_reload(books, env):
         end_idx = start_idx + page_limit
         page_books = books[start_idx: end_idx]
 
-        template = env.get_template('template.html')
+        for book in page_books:
+            book['image_url'] = quote(book['image_url'], safe='/:')
+            book['book_path'] = quote(book['book_path'], safe='/:')
 
-        rendered_page = template.render(books=page_books, page_num=page_num, num_pages=num_pages)
+        template = env.get_template('template.html')
+        rendered_page = template.render(books=page_books, page_num=page_num,
+                                        num_pages=num_pages)
 
         with open(f'pages/index{page_num}.html', 'w', encoding='utf8') as file:
             file.write(rendered_page)

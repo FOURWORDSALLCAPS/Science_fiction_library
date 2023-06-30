@@ -43,9 +43,9 @@
           <div class="row no-gutters">
             <div class="col-md-4">
               {% if book['image_url'].endswith('nopic.gif') %}
-                  <img class="img-fluid" src="/images/nopic.gif" alt="Обложка книги {{book['title']}}">
+                  <img class="img-fluid" src="/media/images/nopic.gif" alt="Обложка книги {{book['title']}}">
               {% else %}
-                  <img class="img-fluid" src="/images/{{book['image_url'].split('/')[-1].split('.')[0]}}.jpg" alt="Обложка книги {{book['title']}}">
+                  <img class="img-fluid" src="{{book['image_url']}}" alt="Обложка книги {{book['title']}}">
               {% endif %}
             </div>
             <div class="col-md-8">
