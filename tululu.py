@@ -49,20 +49,26 @@ def save_to_json(books, dest_folder):
 
 
 def parse_book_page(soup, book_page_url):
-    title_author = soup.select_one('h1').text
+    title_author_tag = soup.select_one('h1')
+
+    if not title_author_tag:
+        return None
+
+    title_author = title_author_tag.text
     title, author = title_author.split(' :: ')
     genre_tags = soup.select('span.d_book a')
     comments_tags = soup.select('div.texts')
+    book_link = soup.select_one('a[href*="txt"]')
+
+    if not book_link:
+        return None
+
     book_image_url = urljoin(book_page_url, soup.select_one('div.bookimage img')['src'])
 
     comments = [comment.select_one('span').get_text() for comment in comments_tags]
-
     genres = [genre_tag.text for genre_tag in genre_tags]
-
     title = sanitize_filename(title.strip())
-
     author = sanitize_filename(author.strip())
-
     book_path = f'/media/books/{title}.txt'
 
     book = {
@@ -125,14 +131,15 @@ def main():
                     response.raise_for_status()
                     soup = BeautifulSoup(response.text, 'lxml')
                     book = parse_book_page(soup, book_link)
-                    books.append(book)
-                    if not args.skip_txt:
-                        download_txt(book['title'], book_id=book_unique_id,
-                                     dest_folder=os.path.join(args.dest_folder, 'media/books/'))
-                    if not args.skip_imgs:
-                        download_image(book['image_url'], dest_folder=os.path.join(args.dest_folder, 'media/images/'))
-                    print('Название:', book['title'])
-                    print('Автор:', book['author'])
+                    if book:
+                        books.append(book)
+                        if not args.skip_txt:
+                            download_txt(book['title'], book_id=book_unique_id,
+                                         dest_folder=os.path.join(args.dest_folder, 'media/books/'))
+                        if not args.skip_imgs:
+                            download_image(book['image_url'], dest_folder=os.path.join(args.dest_folder, 'media/images/'))
+                        print('Название:', book['title'])
+                        print('Автор:', book['author'])
                 except requests.exceptions.HTTPError as e:
                     print(f'Error: Unable to download book {book_unique_id}: {e}', file=sys.stderr)
                 except requests.exceptions.ConnectionError as e:

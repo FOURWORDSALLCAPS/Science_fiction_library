@@ -43,7 +43,7 @@
             <div class="row no-gutters">
               <div class="col-md-4">
                 {% if book['image_url'].endswith('nopic.gif') %}
-                  <img class="img-fluid" src="/media/images/nopic.gif" alt="Обложка книги {{book['title']}}">
+                  <img class="img-fluid" src="../media/images/nopic.gif" alt="Обложка книги {{book['title']}}">
                 {% else %}
                   <img class="img-fluid" src="{{book['image_url']}}" alt="Обложка книги {{book['title']}}">
                 {% endif %}
