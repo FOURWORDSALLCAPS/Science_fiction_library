@@ -10,8 +10,7 @@ def on_reload(books, env):
     page_limit = 20
 
     num_pages = ceil(len(books) / page_limit)
-    for page_num in range(1, num_pages + 1):
-        start_idx = (page_num - 1) * page_limit
+    for page_num, start_idx in enumerate(range(0, len(books), page_limit), 1):
         end_idx = start_idx + page_limit
         page_books = books[start_idx: end_idx]
 
