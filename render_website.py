@@ -33,17 +33,13 @@ def main():
     parser.add_argument('--dest_folder', type=str, default='json/book.json',
                         help='Путь к конфигурационному файлу .json')
     args = parser.parse_args()
-
     with open(args.dest_folder, 'r', encoding='utf-8') as file:
         books = json.load(file)
-
-    env = Environment(
-        loader=FileSystemLoader('.'),
-        autoescape=select_autoescape(['html', 'xml'])
-    )
+    env = Environment(loader=FileSystemLoader('.'),
+                      autoescape=select_autoescape(['html', 'xml']))
     on_reload(books, env)
     server = Server()
-    server.watch('template.html', on_reload)
+    server.watch('template.html', lambda: on_reload(books, env))
     server.serve(root='.')
 
 
