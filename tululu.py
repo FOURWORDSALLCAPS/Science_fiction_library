@@ -128,9 +128,9 @@ def main():
                     books.append(book)
                     if not args.skip_txt:
                         download_txt(book['title'], book_id=book_unique_id,
-                                     dest_folder=os.path.join(args.dest_folder, 'books/'))
+                                     dest_folder=os.path.join(args.dest_folder, 'media/books/'))
                     if not args.skip_imgs:
-                        download_image(book['image_url'], dest_folder=os.path.join(args.dest_folder, 'images/'))
+                        download_image(book['image_url'], dest_folder=os.path.join(args.dest_folder, 'media/images/'))
                     print('Название:', book['title'])
                     print('Автор:', book['author'])
                 except requests.exceptions.HTTPError as e:
