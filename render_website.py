@@ -31,9 +31,7 @@ def main():
     args = parser.parse_args()
 
     with open(args.dest_folder, "r", encoding="utf-8") as file:
-        books_json = file.read()
-
-    books = json.loads(books_json)
+        books = json.load(file)
 
     env = Environment(
         loader=FileSystemLoader('.'),
