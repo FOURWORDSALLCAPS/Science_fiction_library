@@ -8,11 +8,11 @@ from urllib.parse import quote
 
 
 def on_reload(books, env):
-    page_limit = 20
+    books_per_page = 20
 
-    num_pages = ceil(len(books) / page_limit)
-    for page_num, start_idx in enumerate(range(0, len(books), page_limit), 1):
-        end_idx = start_idx + page_limit
+    num_pages = ceil(len(books) / books_per_page)
+    for page_num, start_idx in enumerate(range(0, len(books), books_per_page), 1):
+        end_idx = start_idx + books_per_page
         page_books = books[start_idx: end_idx]
 
         for book in page_books:
