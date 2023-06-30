@@ -18,7 +18,7 @@ def on_reload(books, env):
 
         rendered_page = template.render(books=page_books, page_num=page_num, num_pages=num_pages)
 
-        with open(f'pages/index{page_num}.html', 'w', encoding="utf8") as file:
+        with open(f'pages/index{page_num}.html', 'w', encoding='utf8') as file:
             file.write(rendered_page)
 
 
@@ -29,7 +29,7 @@ def main():
                         help='Путь к конфигурационному файлу .json')
     args = parser.parse_args()
 
-    with open(args.dest_folder, "r", encoding="utf-8") as file:
+    with open(args.dest_folder, 'r', encoding='utf-8') as file:
         books = json.load(file)
 
     env = Environment(

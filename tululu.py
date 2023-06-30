@@ -50,7 +50,7 @@ def save_to_json(books, dest_folder):
 
 def parse_book_page(soup, book_page_url):
     title_author = soup.select_one('h1').text
-    title, author = title_author.split(" :: ")
+    title, author = title_author.split(' :: ')
     genre_tags = soup.select('span.d_book a')
     comments_tags = soup.select('div.texts')
     book_image_url = urljoin(book_page_url, soup.select_one('div.bookimage img')['src'])
