@@ -69,7 +69,7 @@ def parse_book_page(soup, book_page_url):
     genres = [genre_tag.text for genre_tag in genre_tags]
     title = sanitize_filename(title.strip())
     author = sanitize_filename(author.strip())
-    book_path = f'/media/books/{title}.txt'
+    book_path = f'../media/books/{title}.txt'
 
     book = {
         'title': title,
